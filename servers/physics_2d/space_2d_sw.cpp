@@ -211,7 +211,7 @@ int Physics2DDirectSpaceStateSW::intersect_shape(const RID &p_shape, const Trans
 	return cc;
 }
 
-bool Physics2DDirectSpaceStateSW::cast_motion(const RID &p_shape, const Transform2D &p_xform, const Vector2 &p_motion, real_t p_margin, real_t &p_closest_safe, real_t &p_closest_unsafe, const Set<RID> &p_exclude, uint32_t p_collision_mask) {
+bool Physics2DDirectSpaceStateSW::cast_motion(const RID &p_shape, const Transform2D &p_xform, const Vector2 &p_motion, real_t p_margin, real_t &p_closest_safe, real_t &p_closest_unsafe, int steps, const Set<RID> &p_exclude, uint32_t p_collision_mask) {
 
 	Shape2DSW *shape = Physics2DServerSW::singletonsw->shape_owner.get(p_shape);
 	ERR_FAIL_COND_V(!shape, false);
@@ -267,7 +267,7 @@ bool Physics2DDirectSpaceStateSW::cast_motion(const RID &p_shape, const Transfor
 		real_t hi = 1;
 		Vector2 mnormal = p_motion.normalized();
 
-		for (int i = 0; i < 8; i++) { //steps should be customizable..
+		for (int i = 0; i < steps; i++) { //steps should be customizable..
 
 			real_t ofs = (low + hi) * 0.5;
 
