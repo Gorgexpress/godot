@@ -181,6 +181,7 @@ public:
 		int shape;
 		Vector2 linear_velocity; //velocity at contact point
 		Variant metadata;
+		Object *collider;
 	};
 
 	virtual bool rest_info(RID p_shape, const Transform2D &p_shape_xform, const Vector2 &p_motion, float p_margin, ShapeRestInfo *r_info, const Set<RID> &p_exclude = Set<RID>(), uint32_t p_collision_layer = 0xFFFFFFFF) = 0;

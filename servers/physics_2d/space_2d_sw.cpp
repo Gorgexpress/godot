@@ -424,6 +424,8 @@ bool Physics2DDirectSpaceStateSW::rest_info(RID p_shape, const Transform2D &p_sh
 		return false;
 
 	r_info->collider_id = rcd.best_object->get_instance_id();
+	if (r_info->collider_id != 0)
+		r_info->collider = ObjectDB::get_instance(r_info->collider_id);
 	r_info->shape = rcd.best_shape;
 	r_info->normal = rcd.best_normal;
 	r_info->point = rcd.best_contact;

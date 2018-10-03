@@ -347,6 +347,7 @@ Dictionary Physics2DDirectSpaceState::_get_rest_info(const Ref<Physics2DShapeQue
 	r["shape"] = sri.shape;
 	r["linear_velocity"] = sri.linear_velocity;
 	r["metadata"] = sri.metadata;
+	r["collider"] = sri.collider;
 
 	return r;
 }
