@@ -8,7 +8,7 @@
 #include "scene/resources/shape_2d.h"
 
 struct BulletType {
-	Ref<Shape2D> shape;
+	RID shape_rid;
 	Sprite* sprite;
 	Rect2 src_rect;
 	Rect2 dest_rect;
@@ -69,7 +69,7 @@ class BulletManager : public Node2D {
 	void _update_bullets();
 	void _draw_bullets();
 	void _register_bullet_types();
-	
+	void _get_visible_rect(Rect2 &rect);
 
 protected:
 	void _notification(int p_what);

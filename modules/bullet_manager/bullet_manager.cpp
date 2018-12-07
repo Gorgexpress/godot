@@ -13,8 +13,8 @@ void BulletManager::_notification(int p_what) {
 
 		case NOTIFICATION_READY: {
 			set_physics_process(true);
-			set_as_toplevel(true);
 			_register_bullet_types();
+			set_as_toplevel(true);
 		} break;
 		case NOTIFICATION_DRAW: {
 			if (texture.is_null())
@@ -214,16 +214,20 @@ void BulletManager::_get_rects(Rect2 &r_src_rect, Rect2 &r_dst_rect, bool &r_fil
 }
 
 void BulletManager::_update_bullets() {
+	
 	Physics2DServer *ps = Physics2DServer::get_singleton();
 	float delta = get_physics_process_delta_time();
 	int size = bullets.size();
+	Rect2 visible_rect;
+	_get_visible_rect(visible_rect);
+	visible_rect.grow(300);
 	{
 		PoolVector<Bullet*>::Read r = bullets.read();
 		PoolVector<Bullet*>::Write w = bullets.write();
 		int i = 0;
 		while (i < size) {
 			Bullet* bullet = r[i];
-			if(bullet->has_collided) {
+			if(bullet->has_collided || !visible_rect.has_point(bullet->matrix.get_origin())) {
 				ps->free(bullet->area);
 				w[i] = r[size - 1];
 				memdelete(bullet);
@@ -263,9 +267,11 @@ void BulletManager::_draw_bullets() {
 			_get_rects(type->src_rect, type->dest_rect, filter_clip);
 			type->is_updated = true;
 		}
-		dst_rect = type->dest_rect;
-		dst_rect.position = bullet->matrix[2] + type->dest_rect.position;
-		draw_texture_rect_region(type->sprite->get_texture(), dst_rect, type->src_rect, Color(1, 1, 1), false, normal_map, filter_clip);
+		//dst_rect = type->dest_rect;
+		//dst_rect.position = bullet->matrix[2] + type->dest_rect.position;
+		draw_set_transform_matrix(bullet->matrix);
+		draw_set_transform(bullet->matrix.get_origin(), bullet->direction.angle() + (Math_PI * -0.5), bullet->matrix.get_scale());
+		draw_texture_rect_region(type->sprite->get_texture(), type->dest_rect, type->src_rect, Color(1, 1, 1), false, normal_map, filter_clip);
 	}
 	for (Map<StringName, BulletType>::Element *E = types.front(); E; E = E->next()) {
 		E->get().is_updated = false;
@@ -289,7 +295,7 @@ void BulletManager::add_bullet(StringName type, Vector2 position, Vector2 direct
 	ps->area_set_monitor_callback(area, bullet, _body_inout_name);
 	ps->area_set_area_monitor_callback(area, bullet, _area_inout_name);
 	ps->area_set_transform(area, bullet->matrix);
-	ps->area_add_shape(area, shape->get_rid());
+	ps->area_add_shape(area, bullet->type->shape_rid);
 	
 
 	if (is_inside_tree()) {
@@ -336,7 +342,7 @@ void BulletManager::_register_bullet_types() {
 		Sprite *s = Object::cast_to<Sprite>(child);
 		types[name].sprite = s;
 		CollisionShape2D *bullet_shape = Object::cast_to<CollisionShape2D>(s->get_child(0));
-		types[name].shape = bullet_shape;
+		types[name].shape_rid = bullet_shape->get_shape()->get_rid();
 		types[name].name = name;
 		types[name].is_updated = false;
 	    //area->shape_owner_get_shape(0);
@@ -344,3 +350,9 @@ void BulletManager::_register_bullet_types() {
 	}
 }
 
+void BulletManager::_get_visible_rect(Rect2& rect)
+{
+	Transform2D ctrans = get_canvas_transform();
+	rect.position = -ctrans.get_origin() / ctrans.get_scale();
+	rect.size = get_viewport_rect().size;
+}
